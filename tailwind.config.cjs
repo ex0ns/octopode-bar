@@ -12,9 +12,10 @@ module.exports = ({env}) => {
       extend: {
         colors: {
           gray: colors.gray,
-        },
-        gridTemplateColumns:{
-          'table': 'minmax(8em, 25%) minmax(50%, 75%)'
+          'purple': {
+            dark: '#3e0189',
+            light: '#7f66ff'
+          }
         },
         fontFamily: {
           condensed: [
