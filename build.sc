@@ -87,6 +87,15 @@ object app extends ScalaJSModule with ScalafmtModule with DockerModule /*with Sc
       app.fullLinkJS()
       os.proc("yarn", "build").call()
       os.copy(T.workspace / "dist", dest / "dist")
+      /*
+      :>From the section PERMISSIONS in thttpd(8):
+       In summary, data files should  be  mode  644  (rw-r--r--),
+       directories should be 755 (rwxr-xr-x) if you want to allow
+       indexing and 711 (rwx--x--x) to disallow it, and CGI  pro­
+       grams should be mode 755 (rwxr-xr-x) or 711 (rwx--x--x).
+       */
+      os.proc("find", dest, "-type", "d", "-exec", "chmod", "711", "{}", "+").call()
+      os.proc("find", dest, "-type", "f", "-exec", "chmod", "644", "{}", "+").call()
 
       os.write(dest / "Dockerfile", dockerfile())
 
@@ -111,7 +120,6 @@ object app extends ScalaJSModule with ScalafmtModule with DockerModule /*with Sc
     final def pushCustom() = T.command {
       val tags = buildCustom()
       tags.foreach(t => os.proc(executable(), "push", t).call(stdout = os.Inherit, stderr = os.Inherit))
-
     }
   }
 }

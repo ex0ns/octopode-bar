@@ -1,0 +1,106 @@
+variables:
+  COURSIER_CACHE: $CI_PROJECT_DIR/.cache
+  MILL_CLI_PAR: "-D coursier.cache=$CI_PROJECT_DIR/.cache --disable-ticker -j 0 --no-server"
+  MILL_CLI: "-D coursier.cache=$CI_PROJECT_DIR/.cache --disable-ticker -j 1 --no-server"
+  FF_USE_FASTZIP: "true"
+  # These can be specified per job or per pipeline
+  ARTIFACT_COMPRESSION_LEVEL: "fastest"
+  CACHE_COMPRESSION_LEVEL: "fastest"
+
+# Cache
+.node_modules-cache: &node_modules-cache
+  key:
+    files:
+      - yarn.lock
+  paths:
+    - node_modules
+  policy: pull
+
+.mill-cache: &mill-cache
+  key:
+    files:
+      - build.sc
+  paths:
+    - $CI_PROJECT_DIR/.cache
+    - $HOME/.ivy2
+
+.yarn-cache: &yarn-cache
+  key: yarn-$CI_JOB_IMAGE
+  paths:
+    - .yarn
+  policy: pull
+
+.build-build-image-template: &build-builder-image-template
+  image: docker:20.10.8-alpine3.14
+  stage: .pre
+  tags:
+    - docker
+  script:
+    - cd ci
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - DOCKER_BUILDKIT=1 docker build . -t $CI_REGISTRY/ex0ns/octopode-cash/builder:latest
+    - docker push $CI_REGISTRY/ex0ns/octopode-cash/builder:latest
+
+build-builder-image-auto:
+  <<: *build-builder-image-template
+  rules:
+    - changes:
+        - ci/Dockerfile
+
+build-builder-image-manual:
+  <<: *build-builder-image-template
+  when: manual
+
+install-javascript-deps-manual:
+  stage: .pre
+  image: "$CI_REGISTRY/ex0ns/octopode-cash/builder:latest"
+  cache:
+    - <<: *node_modules-cache
+      policy: pull-push
+    - <<: *yarn-cache
+      policy: pull-push
+  when: manual
+  script:
+    - yarn install --immutable --immutable-cache --check-cache --cache-folder .yarn
+
+install-javascript-deps:
+  stage: .pre
+  image: "$CI_REGISTRY/ex0ns/octopode-cash/builder:latest"
+  tags:
+    - docker
+  cache:
+    - <<: *node_modules-cache
+      policy: pull-push
+    - <<: *yarn-cache
+      policy: pull-push
+  only:
+    changes:
+      - package.json
+  script:
+    - yarn install --immutable --immutable-cache --check-cache --cache-folder .yarn
+
+build-backend-image:
+  image: "$CI_REGISTRY/ex0ns/octopode-cash/builder:latest"
+  stage: build
+  cache:
+    - <<: *node_modules-cache
+    - <<: *mill-cache
+      policy: pull-push
+  tags:
+    - docker
+  when: manual
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - "tree $CI_PROJECT_DIR/.cache || :"
+    - mill $MILL_CLI_PAR app.docker.pushCustom
+    - "tree $CI_PROJECT_DIR/.cache || :"
+
+deploy-backend:
+  stage: deploy
+  image: "$CI_REGISTRY/ex0ns/nomad/nomad:1.3.1"
+  when: manual
+  variables:
+    NOMAD_ADDR: "http://10.0.2.12:4646"
+  script:
+    - nomad job run -detach nomad/server.nomad
