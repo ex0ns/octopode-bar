@@ -25,6 +25,9 @@ jobs:
         with:
           mill-version: 0.10.5
 
+      - name: Test
+        run: mill app.test.test
+
       - name: Install and Build 🔧
         run: mill app.buildWebsite
 

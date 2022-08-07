@@ -14,6 +14,9 @@ import contrib.docker.DockerModule
 object Versions {
   val laminar         = "0.14.2"
   val scalafixImports = "0.6.0"
+  val scalaSpec       = "3.2.12"
+  val secureRandom    = "1.0.0"
+  val scalaCheckTest  = "3.2.12.0"
 }
 
 object app extends ScalaJSModule with ScalafmtModule with DockerModule /*with ScalafixModule*/ {
@@ -35,6 +38,16 @@ object app extends ScalaJSModule with ScalafmtModule with DockerModule /*with Sc
     app.fullLinkJS()
     os.proc("yarn", "build").call()
     os.copy(T.workspace / "dist", dest / "dist")
+  }
+
+  object test extends Tests with TestModule.ScalaTest {
+    def scalacOptions = app.scalacOptions
+    def ivyDeps = Agg(
+      ivy"org.scalatest::scalatest::${Versions.scalaSpec}",
+      ivy"org.scala-js::scalajs-java-securerandom::${Versions.secureRandom}".withDottyCompat(scalaVersion()),
+      ivy"org.scalatest::scalatest-flatspec::${Versions.scalaSpec}",
+      ivy"org.scalatestplus::scalacheck-1-16::${Versions.scalaCheckTest}"
+    )
   }
 
   object docker extends DockerConfig {

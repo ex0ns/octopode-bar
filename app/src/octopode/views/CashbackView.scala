@@ -5,8 +5,8 @@ import models._
 import com.raquo.laminar.api.L.{ *, given }
 
 class CashbackView(order: Order, appState: Var[ViewState]) {
-  private val selected = Var[Cashback](Cashback.empty)
-  private val ows      = selected.signal.map(_.rawTotal).map(_ - order.rawTotal).map(_.toDouble)
+  private[views] val selected = Var[Cashback](Cashback.empty)
+  private[views] val ows      = selected.signal.map(_.rawTotal).map(_ - order.rawTotal).map(_.toDouble)
 
   def render() =
     div(
