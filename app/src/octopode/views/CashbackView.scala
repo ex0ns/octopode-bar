@@ -14,8 +14,9 @@ class CashbackView(order: Order, appState: Var[ViewState]) {
       div(
         div(s"Prix: ${order.total.toString()}"),
         child <-- ows.map {
-          case ows if ows > 0 => s"Tu dois ${ows} CHF"
-          case ows if ows < 0 => s"On te doit ${-ows} CHF"
+          case ows if ows > 0  => s"Tu dois ${ows} CHF"
+          case ows if ows < 0  => s"On te doit ${-ows} CHF"
+          case ows if ows == 0 => "Le compte est bon"
         }
       ),
       div(
