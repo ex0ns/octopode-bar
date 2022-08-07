@@ -1,4 +1,3 @@
-import { spawnSync } from "child_process";
 import { defineConfig } from "vite";
 
 function isDev() {
@@ -10,6 +9,7 @@ const replacementForPublic = isDev()
   : "./out/app/fullLinkJS.dest"
 
 export default defineConfig({
+  base: "",
   resolve: {
     alias: [
       {

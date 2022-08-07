@@ -10,7 +10,7 @@ class MenuView(order: Var[Order], appState: Var[ViewState]) {
     div(
       cls := "h-full flex flex-col",
       div(
-        cls := "grid gap-4 grid-cols-1 grid-rows-3",
+        cls := "grid gap-4 grid-cols-1 auto-rows-max",
         children <-- Signal.fromValue(Item.values.toSeq.map(renderItem))
       ),
       payButton(),
@@ -22,10 +22,8 @@ class MenuView(order: Var[Order], appState: Var[ViewState]) {
 
   private def renderItem(item: Item): HtmlElement = div(
     cls := "py-2",
-    span(
-      cls := "text-xl font-bold",
-      item.name
-    ),
+    span(cls := "text-xl font-bold", item.name),
+    span(cls := "ml-1 text-sm", s" ${item.price}CHF"),
     div(
       cls := "flex my-2",
       button(

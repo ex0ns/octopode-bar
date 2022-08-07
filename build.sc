@@ -29,6 +29,14 @@ object app extends ScalaJSModule with ScalafmtModule with DockerModule /*with Sc
 
   def moduleKind = T(ModuleKind.CommonJSModule)
 
+  def buildWebsite = T {
+    val dest = T.dest
+
+    app.fullLinkJS()
+    os.proc("yarn", "build").call()
+    os.copy(T.workspace / "dist", dest / "dist")
+  }
+
   object docker extends DockerConfig {
     def baseImage     = "alpine:3.16.1"
     def pullBaseImage = true

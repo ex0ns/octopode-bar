@@ -1,4 +1,5 @@
-package octopode.views
+package octopode
+package views
 
 enum ViewState:
   def next(): ViewState = this match {
