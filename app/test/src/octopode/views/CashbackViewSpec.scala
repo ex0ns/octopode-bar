@@ -22,14 +22,14 @@ class CashbackViewSpec extends AsyncFlatSpec with Matchers with ScalaCheckDriven
   private val cashbackGen = billGen.map(bills => Cashback.apply(bills.toList))
 
   it should "Expect the price of the order" in {
-    val view = new CashbackView(Order(List(Item.Beer)), Var(ViewState.Cashback))
-    view.ows.observe(testableOwner).now() shouldBe -Item.Beer.price.toDouble
+    val view = new CashbackView(Order(List(Item.Drink)), Var(ViewState.Cashback))
+    view.ows.observe(testableOwner).now() shouldBe -Item.Drink.price.toDouble
   }
 
   it should "Reduce the price based on the selection" in {
-    val view = new CashbackView(Order(List(Item.Beer)), Var(ViewState.Cashback))
+    val view = new CashbackView(Order(List(Item.Drink)), Var(ViewState.Cashback))
     view.selected.update(_.add(Bill.Bill1))
-    view.ows.observe(testableOwner).now() shouldBe (-Item.Beer.price + Bill.Bill1.value).toDouble
+    view.ows.observe(testableOwner).now() shouldBe (-Item.Drink.price + Bill.Bill1.value).toDouble
   }
 
   it should "be able to combine items and bills" in {
