@@ -12,7 +12,7 @@ class ItemSpec extends AsyncFlatSpec with Matchers {
   }
 
   it should "A soft drink should include the price of a returnable glass" in {
-    Item.Soft.price - Returnable.GLASS shouldBe BigDecimal(3)
+    Item.Soft.price - Returnable.GLASS shouldBe BigDecimal(4)
   }
 
   it should "A pitcher should include the price of a returnable bottle" in {
